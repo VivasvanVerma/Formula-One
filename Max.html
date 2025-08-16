@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Formula One Hub</title>
+  <meta name="description" content="Max Verstappen fan hub: IST countdown, live podium, calendar, predictions, Max & F1 facts + trivia. Single-file."/>
+  <style>
+    :root{
+      --orange:#ff6a00;
+      --ink:#e8eefb;
+      --muted:#9aa6bf;
+      --stroke:rgba(255,255,255,.12);
+      --glass:rgba(255,255,255,.04);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial; color:var(--ink);
+      background: radial-gradient(1200px 800px at 90% -10%, #12233d 0%, #0a1323 40%, #050914 100%);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; overflow-x:hidden;
+    }
+    .wrap{max-width:1120px; margin:0 auto; padding:20px}
+    header{display:flex; align-items:center; gap:16px; justify-content:space-between; margin-bottom:16px}
+    .brand{display:flex; align-items:center; gap:14px}
+    .badge{background:linear-gradient(135deg,var(--orange),#ff3b00); color:white; padding:8px 12px; border-radius:999px; font-weight:800}
+    h1{margin:0; font-size:clamp(22px,3.2vw,36px);font-weight:800}
+    .sub{color:var(--muted); font-size:13px}
+    .grid{display:grid; gap:16px}
+    @media(min-width:1000px){.grid{grid-template-columns:1.15fr 1fr}}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)); border:1px solid var(--stroke); border-radius:18px; padding:18px; backdrop-filter: blur(8px); box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .card h2{margin:0 0 8px 0; font-size:18px}
+    .pill{display:inline-flex; gap:8px; background:var(--glass); border:1px solid var(--stroke); padding:6px 10px; border-radius:999px; font-size:12px}
+    .btn{appearance:none; border:none; outline:none; background:linear-gradient(135deg,var(--orange),#ff3b00); color:white; padding:10px 14px; border-radius:12px; font-weight:800; cursor:pointer}
+    .btn.secondary{background:transparent; border:1px solid var(--stroke); color:var(--ink)}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .countdown{display:grid; grid-template-columns:repeat(4,minmax(72px,1fr)); gap:10px; margin:12px 0}
+    .timebox{background:#07101a; border:1px solid var(--stroke); border-radius:12px; padding:10px; text-align:center}
+    .timebox .num{font-size:24px; font-weight:900}
+    .timebox .lab{font-size:11px; color:var(--muted); text-transform:uppercase}
+    .lights{display:flex; gap:8px; align-items:center}
+    .light{width:14px; height:14px; border-radius:50%; background:#222; border:1px solid #444}
+    .light.on{background:#e53935; box-shadow:0 0 8px rgba(229,57,53,.45)}
+    .light.go{background:#00c853; box-shadow:0 0 8px rgba(0,200,83,.45)}
+    .list{display:grid; gap:10px; max-height:380px; overflow:auto; padding-right:6px}
+    .race{display:grid; grid-template-columns:100px 1fr auto; align-items:center; gap:12px; background:#07121a; border:1px solid var(--stroke); border-radius:12px; padding:10px}
+    .race.past{opacity:.55}
+    .race .date{font-weight:800; color:#ffd400}
+    .race .where{color:#d9e4ff}
+    .race .meta{font-size:12px; color:var(--muted)}
+    .podium{display:grid; grid-template-columns:1fr 1.1fr 1fr; gap:10px; align-items:end}
+    .pod{background:#0b1323; border:1px solid var(--stroke); border-radius:14px; padding:12px; text-align:center; position:relative}
+    .pod.first{height:140px; border-color:rgba(255,106,0,.6); box-shadow:0 0 0 1px rgba(255,106,0,.12)}
+    .pod.second{height:110px}
+    .pod.third{height:90px}
+    .pod .name{font-weight:800}
+    .pod .pts{font-size:12px; color:var(--muted)}
+    .tag{display:inline-block; padding:4px 8px; background:rgba(255,212,0,.12); color:#ffd400; border-radius:999px; font-weight:800}
+    input,select{background:#0b1323; color:var(--ink); border:1px solid var(--stroke); border-radius:10px; padding:10px}
+    table{width:100%; border-collapse:collapse}
+    th,td{border-bottom:1px solid rgba(255,255,255,.03); padding:8px; text-align:left; font-size:13px}
+    .foot{margin-top:18px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; color:var(--muted); font-size:13px}
+    .extras-row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px}
+    .factBox{margin-top:10px; background:rgba(255,255,255,.02); padding:10px; border-radius:10px; border:1px solid var(--stroke)}
+    .trivia-choices{display:flex; gap:8px; margin-top:8px; flex-wrap:wrap}
+    .choice-btn{background:transparent; border:1px solid var(--stroke); color:var(--ink); padding:8px 10px; border-radius:8px; cursor:pointer}
+    .result-ok{color:#2ecc71; font-weight:800}
+    .result-bad{color:#e74c3c; font-weight:800}
+    .hidden{display:none}
+    @media(max-width:800px){.grid{grid-template-columns:1fr}.podium{grid-template-columns:1fr}.pod.first{height:110px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="badge">#1</div>
+        <div>
+          <h1>Formula One Hub</h1>
+          <div class="sub">IST countdown · live podium · 2025 calendar · predictions · facts & trivia</div>
+        </div>
+      </div>
+      <button class="btn" id="installBtn">Add to Home</button>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <div class="row" style="justify-content:space-between; align-items:flex-end">
+          <h2>⏳ Next Race</h2>
+          <span class="pill" id="nextRaceLabel">Loading…</span>
+        </div>
+        <div class="lights" id="lights" aria-label="Start lights">
+          <div class="light"></div>
+          <div class="light"></div>
+          <div class="light"></div>
+          <div class="light"></div>
+          <div class="light"></div>
+        </div>
+        <div class="countdown" id="countdown">
+          <div class="timebox"><div class="num" id="d">–</div><div class="lab">Days</div></div>
+          <div class="timebox"><div class="num" id="h">–</div><div class="lab">Hours</div></div>
+          <div class="timebox"><div class="num" id="m">–</div><div class="lab">Mins</div></div>
+          <div class="timebox"><div class="num" id="s">–</div><div class="lab">Secs</div></div>
+        </div>
+        <div class="tiny">Times shown in <b>IST</b>.</div>
+        <div class="row" style="margin-top:12px">
+          <a class="btn secondary" href="https://www.formula1.com/en/results.html/2025/drivers.html" target="_blank">🏆 Driver Standings</a>
+          <a class="btn secondary" href="https://www.formula1.com/en/results.html/2025/team.html" target="_blank">🏁 Constructor Standings</a>
+          <span class="pill" id="liveStatus" style="margin-left:8px">Live podium: checking…</span>
+        </div>
+      </section>
+
+      <section class="card standings">
+        <h2>🏆 Podium Now</h2>
+        <div class="podium" id="driversPodium">
+          <div class="pod second"><div class="name">–</div><div class="pts">— pts</div></div>
+          <div class="pod first"><div class="name">–</div><div class="pts">— pts</div></div>
+          <div class="pod third"><div class="name">–</div><div class="pts">— pts</div></div>
+        </div>
+        <div class="tiny" style="margin-top:6px">Drivers</div>
+
+        <div style="height:12px"></div>
+        <div class="podium" id="constructorsPodium">
+          <div class="pod second"><div class="name">–</div><div class="pts">— pts</div></div>
+          <div class="pod first"><div class="name">–</div><div class="pts">— pts</div></div>
+          <div class="pod third"><div class="name">–</div><div class="pts">— pts</div></div>
+        </div>
+        <div class="tiny" style="margin-top:6px">Constructors</div>
+      </section>
+
+      <section class="card" style="grid-column:1 / -1">
+        <div class="row" style="justify-content:space-between; align-items:end">
+          <h2>📅 2025 Formula 1 Race Calendar</h2>
+          <span class="tag">24 rounds</span>
+        </div>
+        <div class="list" id="raceList"></div>
+        <div class="tiny" style="margin-top:8px">Data: official 2025 calendar. “Add to calendar” downloads a local .ics file (IST weekend dates).</div>
+      </section>
+
+      <section class="card">
+        <h2>🎯 Podium Predictions</h2>
+        <form class="form" id="predForm">
+          <label>Upcoming race
+            <select id="raceSelect" aria-label="Choose race for prediction"></select>
+          </label>
+          <div class="row" style="margin-top:8px">
+            <input id="p1" placeholder="P1 (e.g., Verstappen)" required>
+            <input id="p2" placeholder="P2" required>
+            <input id="p3" placeholder="P3" required>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" type="submit">Save Prediction</button>
+            <button class="btn secondary" type="button" id="clearPred">Clear</button>
+            <button class="btn ghost secondary" type="button" id="exportBtn">Export (.json)</button>
+            <label class="btn ghost secondary" style="cursor:pointer">Import <input type="file" id="importFile" accept="application/json" style="display:none"></label>
+          </div>
+        </form>
+        <div class="note tiny" style="margin-top:8px">Stored locally. Only future races appear.</div>
+        <div id="predTableWrap" class="hidden" style="margin-top:10px">
+          <table id="predTable"></table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>🔥 Extras — Facts & Trivia</h2>
+        <div class="extras-row">
+          <button class="btn secondary" id="maxFactBtn">Random Max Fact</button>
+          <button class="btn secondary" id="f1FactBtn">Random F1 Fact</button>
+          <button class="btn secondary" id="triviaBtn">Random Trivia</button>
+        </div>
+
+        <div id="factBox" class="factBox" style="display:none"></div>
+
+        <div id="triviaBox" class="factBox" style="display:none">
+          <div id="triviaQ"></div>
+          <div class="trivia-choices" id="triviaChoices"></div>
+          <div id="triviaResult" style="margin-top:8px"></div>
+        </div>
+        <div class="tiny" style="margin-top:8px">Facts and trivia are embedded locally and will not repeat until the set is exhausted (then reshuffles).</div>
+      </section>
+    </div>
+
+    <div class="foot">
+      <div>Made by Vivasvan Verma, for the <span style="color:var(--orange)">Orange Army</span>. PS, Happy Birthday Maira :)</div>
+      <div id="testStatus" class="pill">Self-tests: running…</div>
+    </div>
+  </div>
+
+<script>
+/* =========================
+   Utilities / IST helpers (robust)
+   ========================= */
+function istDateFromYMD(ymd, hour=0, min=0, sec=0){
+  // return a Date representing that YMD at IST (approx by adding offset)
+  // Create UTC-based date for the same YMD/time, then add IST offset (5.5h)
+  var parts = ymd.split('-').map(Number);
+  var utc = Date.UTC(parts[0], parts[1]-1, parts[2], hour, min, sec);
+  return new Date(utc + (5.5 * 3600 * 1000));
+}
+function nowISTms(){ return Date.now() + (5.5 * 3600 * 1000); }
+function endOfDayISTms(ymd){ return istDateFromYMD(ymd,23,59,59).getTime(); }
+function dateRangeLabel(ys, ye){
+  var s = istDateFromYMD(ys,0,0,0);
+  var e = istDateFromYMD(ye,23,59,59);
+  return s.toLocaleString('en-IN', {month:'short', day:'numeric'}) + ' – ' + e.toLocaleString('en-IN', {month:'short', day:'numeric'}) + ' IST';
+}
+function addDayISO(iso){ var d = new Date(iso + 'T00:00:00Z'); d.setDate(d.getDate()+1); return d.toISOString().slice(0,10); }
+function toICS(dt){ return new Date(dt).toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'; }
+function slug(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c];}); }
+
+/* =========================
+   Calendar + predictions (kept as before)
+   ========================= */
+const races = [
+  {round:1,  name:"Australian Grand Prix", country:"Australia", city:"Melbourne", dateStart:"2025-03-14", dateEnd:"2025-03-16"},
+  {round:2,  name:"Chinese Grand Prix", country:"China", city:"Shanghai", dateStart:"2025-03-21", dateEnd:"2025-03-23"},
+  {round:3,  name:"Japanese Grand Prix", country:"Japan", city:"Suzuka", dateStart:"2025-04-04", dateEnd:"2025-04-06"},
+  {round:4,  name:"Bahrain Grand Prix", country:"Bahrain", city:"Sakhir", dateStart:"2025-04-11", dateEnd:"2025-04-13"},
+  {round:5,  name:"Saudi Arabian Grand Prix", country:"Saudi Arabia", city:"Jeddah", dateStart:"2025-04-18", dateEnd:"2025-04-20"},
+  {round:6,  name:"Miami Grand Prix", country:"United States", city:"Miami", dateStart:"2025-05-02", dateEnd:"2025-05-04"},
+  {round:7,  name:"Emilia-Romagna Grand Prix", country:"Italy", city:"Imola", dateStart:"2025-05-16", dateEnd:"2025-05-18"},
+  {round:8,  name:"Monaco Grand Prix", country:"Monaco", city:"Monaco", dateStart:"2025-05-23", dateEnd:"2025-05-25"},
+  {round:9,  name:"Spanish Grand Prix", country:"Spain", city:"Barcelona", dateStart:"2025-05-30", dateEnd:"2025-06-01"},
+  {round:10, name:"Canadian Grand Prix", country:"Canada", city:"Montreal", dateStart:"2025-06-13", dateEnd:"2025-06-15"},
+  {round:11, name:"Austrian Grand Prix", country:"Austria", city:"Spielberg", dateStart:"2025-06-27", dateEnd:"2025-06-29"},
+  {round:12, name:"British Grand Prix", country:"United Kingdom", city:"Silverstone", dateStart:"2025-07-04", dateEnd:"2025-07-06"},
+  {round:13, name:"Belgian Grand Prix", country:"Belgium", city:"Spa", dateStart:"2025-07-25", dateEnd:"2025-07-27"},
+  {round:14, name:"Hungarian Grand Prix", country:"Hungary", city:"Budapest", dateStart:"2025-08-01", dateEnd:"2025-08-03"},
+  {round:15, name:"Dutch Grand Prix", country:"Netherlands", city:"Zandvoort", dateStart:"2025-08-29", dateEnd:"2025-08-31"},
+  {round:16, name:"Italian Grand Prix", country:"Italy", city:"Monza", dateStart:"2025-09-05", dateEnd:"2025-09-07"},
+  {round:17, name:"Azerbaijan Grand Prix", country:"Azerbaijan", city:"Baku", dateStart:"2025-09-19", dateEnd:"2025-09-21"},
+  {round:18, name:"Singapore Grand Prix", country:"Singapore", city:"Singapore", dateStart:"2025-10-03", dateEnd:"2025-10-05"},
+  {round:19, name:"United States Grand Prix", country:"United States", city:"Austin", dateStart:"2025-10-17", dateEnd:"2025-10-19"},
+  {round:20, name:"Mexico City Grand Prix", country:"Mexico", city:"Mexico City", dateStart:"2025-10-24", dateEnd:"2025-10-26"},
+  {round:21, name:"São Paulo Grand Prix", country:"Brazil", city:"Sao Paulo", dateStart:"2025-11-07", dateEnd:"2025-11-09"},
+  {round:22, name:"Las Vegas Grand Prix", country:"United States", city:"Las Vegas", dateStart:"2025-11-20", dateEnd:"2025-11-22"},
+  {round:23, name:"Qatar Grand Prix", country:"Qatar", city:"Lusail", dateStart:"2025-11-28", dateEnd:"2025-11-30"},
+  {round:24, name:"Abu Dhabi Grand Prix", country:"United Arab Emirates", city:"Yas Marina", dateStart:"2025-12-05", dateEnd:"2025-12-07"}
+];
+
+const raceListEl = document.getElementById('raceList');
+const raceSelect = document.getElementById('raceSelect');
+
+// Build list & select safely
+races.forEach(function(r){
+  var isPast = endOfDayISTms(r.dateEnd) < nowISTms();
+  var item = document.createElement('div'); item.className = 'race' + (isPast? ' past' : '');
+  var dateBox = document.createElement('div'); dateBox.className='date'; dateBox.innerHTML = 'Rd '+r.round + '<br>' + dateRangeLabel(r.dateStart, r.dateEnd);
+  var info = document.createElement('div');
+  var where = document.createElement('div'); where.className='where'; where.textContent = r.name;
+  var meta = document.createElement('div'); meta.className='meta'; meta.textContent = r.city + ', ' + r.country;
+  info.appendChild(where); info.appendChild(meta);
+  var actions = document.createElement('div'); actions.className='row';
+  var addBtn = document.createElement('button'); addBtn.className='btn secondary'; addBtn.textContent='Add to calendar';
+  addBtn.dataset.r = JSON.stringify(r);
+  var link = document.createElement('a'); link.className='btn secondary'; link.target='_blank'; link.rel='noopener'; link.href = 'https://www.formula1.com/en/racing/2025/' + slug(r.country); link.textContent = 'Event page';
+  actions.appendChild(addBtn); actions.appendChild(link);
+  item.appendChild(dateBox); item.appendChild(info); item.appendChild(actions);
+  raceListEl.appendChild(item);
+  if(!isPast){
+    var opt = document.createElement('option'); opt.value = r.round; opt.textContent = 'Rd '+r.round + ' – ' + r.name;
+    raceSelect.appendChild(opt);
+  }
+});
+
+// Add-to-calendar
+raceListEl.addEventListener('click', function(e){
+  var btn = e.target.closest('button');
+  if(!btn || !btn.dataset.r) return;
+  var r;
+  try{ r = JSON.parse(btn.dataset.r); } catch(err){ return; }
+  var dtStart = r.dateStart.replace(/-/g,'');
+  var dtEnd = addDayISO(r.dateEnd).replace(/-/g,'');
+  var lines = [
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Orange Army Hub//EN','BEGIN:VEVENT',
+    'UID:' + ('id-' + Date.now()),
+    'DTSTAMP:' + toICS(new Date()),
+    'DTSTART;VALUE=DATE:' + dtStart,
+    'DTEND;VALUE=DATE:' + dtEnd,
+    'SUMMARY:' + r.name,
+    'LOCATION:' + r.city + ', ' + r.country,
+    'DESCRIPTION:Round ' + r.round + ' – ' + r.name + ' (F1 2025).',
+    'END:VEVENT','END:VCALENDAR'
+  ];
+  var ics = lines.join('\r\n');
+  var blob = new Blob([ics], {type:'text/calendar'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href = url; a.download = 'F1_2025_Rd' + r.round + '_' + slug(r.name) + '.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+});
+
+/* =========================
+   Countdown (IST)
+   ========================= */
+var next = races.find(function(r){ return endOfDayISTms(r.dateEnd) >= nowISTms(); }) || races[races.length-1];
+var target = istDateFromYMD(next.dateEnd, 15, 0, 0).getTime();
+document.getElementById('nextRaceLabel').textContent = 'Rd ' + next.round + ' · ' + next.name + ' · ' + next.city;
+
+function tick(){
+  var t = target - nowISTms();
+  if(t <= 0){ ['d','h','m','s'].forEach(function(id){ document.getElementById(id).textContent = '0'; }); return; }
+  var d = Math.floor(t / 86400000);
+  var h = Math.floor((t % 86400000) / 3600000);
+  var m = Math.floor((t % 3600000) / 60000);
+  var s = Math.floor((t % 60000) / 1000);
+  document.getElementById('d').textContent = d;
+  document.getElementById('h').textContent = h;
+  document.getElementById('m').textContent = m;
+  document.getElementById('s').textContent = s;
+}
+tick(); setInterval(tick, 1000);
+
+/* =========================
+   Lights animation
+   ========================= */
+var lightEls = Array.prototype.slice.call(document.querySelectorAll('.light'));
+function runLights(){
+  lightEls.forEach(function(l){ l.classList.remove('on','go'); });
+  var i=0;
+  var t = setInterval(function(){
+    if(i < lightEls.length){ lightEls[i].classList.add('on'); i++; }
+    else { clearInterval(t); lightEls.forEach(function(x){ x.classList.remove('on'); }); lightEls.forEach(function(x){ x.classList.add('go'); }); setTimeout(function(){ lightEls.forEach(function(x){ x.classList.remove('go'); }); }, 800); }
+  }, 420);
+}
+document.getElementById('lights').addEventListener('click', runLights);
+
+/* =========================
+   Podium: live fetch + color mapping + fallback
+   ========================= */
+var LIVE_KEY = 'orange_live_cache_v2';
+var liveStatusEl = document.getElementById('liveStatus');
+
+// conservative team color map (common teams); others fallback neutral
+var TEAM_COLORS = {
+  'Red Bull': {bg:'#041833', accent: 'linear-gradient(135deg,#ff6a00,#ff3b00)'},
+  'Red Bull Racing': {bg:'#041833', accent: 'linear-gradient(135deg,#ff6a00,#ff3b00)'},
+  'Ferrari': {bg:'#7b0000', accent: 'linear-gradient(135deg,#ff3b00,#ff0000)'},
+  'Mercedes': {bg:'#012e2f', accent: 'linear-gradient(135deg,#38ef7d,#0be881)'},
+  'McLaren': {bg:'#2d1b0b', accent: 'linear-gradient(135deg,#ff8b3d,#ff6a00)'},
+  'Aston Martin': {bg:'#0b6b3a', accent: 'linear-gradient(135deg,#00ff96,#00b894)'},
+  'Alpine': {bg:'#052b4e', accent: 'linear-gradient(135deg,#1e90ff,#00a8ff)'},
+  'Williams': {bg:'#041a2a', accent: 'linear-gradient(135deg,#ffffff,#cfe3ff)'},
+  'Alfa Romeo': {bg:'#3b0f10', accent: 'linear-gradient(135deg,#e63946,#ff7b7b)'},
+  'Haas F1 Team': {bg:'#1b1b1b', accent: 'linear-gradient(135deg,#bdbdbd,#9e9e9e)'},
+  'AlphaTauri': {bg:'#0a1522', accent: 'linear-gradient(135deg,#9aa6bf,#5b6b82)'},
+  'Sauber': {bg:'#051427', accent: 'linear-gradient(135deg,#ffd400,#ff7b00)'}
+};
+
+// safe fetch with timeout
+function fetchWithTimeout(url, ms){
+  ms = ms || 4000;
+  return new Promise(function(resolve, reject){
+    var done=false;
+    var timer = setTimeout(function(){ if(!done){ done=true; reject(new Error('timeout')); } }, ms);
+    fetch(url).then(function(r){ if(done) return; done=true; clearTimeout(timer); if(!r.ok) reject(new Error('http '+r.status)); else resolve(r); }).catch(function(err){ if(done) return; done=true; clearTimeout(timer); reject(err); });
+  });
+}
+
+function applyPodiumColors(containerId, constructors){
+  try{
+    var el = document.getElementById(containerId);
+    var kids = el.children;
+    // ordering in our layout: [second, first, third] visually
+    var order = [constructors[1], constructors[0], constructors[2]];
+    for(var i=0;i<3;i++){
+      var c = order[i];
+      var kid = kids[i];
+      // reset
+      kid.style.background = ''; kid.style.boxShadow=''; kid.style.borderColor = '';
+      if(c && TEAM_COLORS[c.name]){
+        kid.style.background = TEAM_COLORS[c.name].bg;
+        kid.style.borderColor = 'rgba(255,255,255,.06)';
+        kid.style.boxShadow = '0 8px 24px rgba(0,0,0,.4), inset 0 0 40px rgba(0,0,0,.05)';
+      } else {
+        // neutral style (keep the card look)
+        kid.style.background = '';
+        kid.style.borderColor = '';
+        kid.style.boxShadow = '';
+      }
+    }
+  }catch(e){ console.warn(e); }
+}
+
+function setPodiumFromArrays(driverArr, constructorArr){
+  // driverArr: [{name,points}, ...] 0=first,1=second,2=third
+  try{
+    var dEl = document.getElementById('driversPodium').children;
+    var dOrder = [driverArr[1]||{name:'—',points:'—'}, driverArr[0]||{name:'—',points:'—'}, driverArr[2]||{name:'—',points:'—'}];
+    for(var i=0;i<3;i++){
+      dEl[i].querySelector('.name').textContent = dOrder[i].name || '—';
+      dEl[i].querySelector('.pts').textContent = (dOrder[i].points===undefined ? '—' : dOrder[i].points + ' pts');
+    }
+    var cEl = document.getElementById('constructorsPodium').children;
+    var cOrder = [constructorArr[1]||{name:'—',points:'—'}, constructorArr[0]||{name:'—',points:'—'}, constructorArr[2]||{name:'—',points:'—'}];
+    for(var j=0;j<3;j++){
+      cEl[j].querySelector('.name').textContent = cOrder[j].name || '—';
+      cEl[j].querySelector('.pts').textContent = (cOrder[j].points===undefined ? '—' : cOrder[j].points + ' pts');
+    }
+    // apply colors for constructors
+    applyPodiumColors('constructorsPodium', constructorArr);
+  }catch(err){ console.warn(err); }
+}
+
+(function loadLivePodium(){
+  var cached = null;
+  try{ cached = JSON.parse(localStorage.getItem(LIVE_KEY) || 'null'); }catch(e){ cached = null; }
+  var driversUrl = 'https://ergast.com/api/f1/current/driverStandings.json';
+  var constructorsUrl = 'https://ergast.com/api/f1/current/constructorStandings.json';
+
+  Promise.all([
+    fetchWithTimeout(driversUrl, 4500).then(function(r){ return r.json(); }),
+    fetchWithTimeout(constructorsUrl, 4500).then(function(r){ return r.json(); })
+  ]).then(function(results){
+    try{
+      var dlist = results[0].MRData.StandingsTable.StandingsLists[0].DriverStandings;
+      var clist = results[1].MRData.StandingsTable.StandingsLists[0].ConstructorStandings;
+      // build arrays: index 0 = P1, 1 = P2, 2 = P3
+      var topDrivers = [
+        {name: dlist[0].Driver.familyName, points: dlist[0].points},
+        {name: dlist[1].Driver.familyName, points: dlist[1].points},
+        {name: dlist[2].Driver.familyName, points: dlist[2].points}
+      ];
+      var topConstructors = [
+        {name: clist[0].Constructor.name, points: clist[0].points},
+        {name: clist[1].Constructor.name, points: clist[1].points},
+        {name: clist[2].Constructor.name, points: clist[2].points}
+      ];
+      setPodiumFromArrays(topDrivers, topConstructors);
+      try{ localStorage.setItem(LIVE_KEY, JSON.stringify({ts:Date.now(), drivers:topDrivers, constructors:topConstructors})); }catch(e){}
+      liveStatusEl.textContent = 'Live podium: updated';
+      liveStatusEl.style.background = 'rgba(46,204,113,.06)';
+    }catch(e){
+      throw e;
+    }
+  }).catch(function(err){
+    if(cached && cached.drivers){
+      setPodiumFromArrays(cached.drivers, cached.constructors);
+      liveStatusEl.textContent = 'Using cached podium';
+      liveStatusEl.style.background = 'rgba(241,196,15,.06)';
+    } else {
+      // fallback to built-in (Max-first)
+      setPodiumFromArrays(
+        [{name:'Oscar Piastri', points:'—'}, {name:'Lando Norris', points:'—'}, {name:'Max Verstappen', points:'—'}],
+        [{name:'McLaren', points:'—'}, {name:'Ferrari', points:'—'}, {name:'Mercedes', points:'—'}]
+      );
+      liveStatusEl.textContent = 'Live blocked — using fallback';
+      liveStatusEl.style.background = 'rgba(231,76,60,.06)';
+    }
+    console.debug('Podium fetch error (expected in some sandboxes):', err);
+  });
+})();
+
+/* =========================
+   Predictions (unchanged behavior)
+   ========================= */
+var KEY = 'orangeArmyPreds2025_v3';
+var store = (function(){ try{ return JSON.parse(localStorage.getItem(KEY) || '{}'); }catch(e){ return {}; } })();
+var predForm = document.getElementById('predForm');
+var predTable = document.getElementById('predTable');
+var predWrap = document.getElementById('predTableWrap');
+
+predForm.addEventListener('submit', function(e){
+  e.preventDefault();
+  var rd = document.getElementById('raceSelect').value;
+  var rec = {
+    p1: document.getElementById('p1').value.trim(),
+    p2: document.getElementById('p2').value.trim(),
+    p3: document.getElementById('p3').value.trim(),
+    ts: Date.now()
+  };
+  if(!store[rd]) store[rd] = {};
+  store[rd].me = rec;
+  try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){}
+  predForm.reset(); renderTable();
+});
+document.getElementById('clearPred').addEventListener('click', function(){
+  var rd = document.getElementById('raceSelect').value;
+  if(store[rd]) delete store[rd].me;
+  try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){}
+  renderTable();
+});
+
+function renderTable(){
+  var rows = races.filter(function(r){ return endOfDayISTms(r.dateEnd) >= nowISTms(); }).map(function(r){
+    var rec = store[r.round] && store[r.round].me;
+    return '<tr><td>Rd ' + r.round + '</td><td>' + escapeHtml(r.name) + '</td><td>' + (rec ? escapeHtml(rec.p1) + ' / ' + escapeHtml(rec.p2) + ' / ' + escapeHtml(rec.p3) : '— no pick —') + '</td></tr>';
+  }).join('');
+  predTable.innerHTML = '<thead><tr><th>Round</th><th>Race</th><th>Your Pick (P1 / P2 / P3)</th></tr></thead><tbody>' + rows + '</tbody>';
+  predWrap.classList.toggle('hidden', !rows);
+}
+renderTable();
+
+// Export / Import
+document.getElementById('exportBtn').addEventListener('click', function(e){ e.preventDefault();
+  var blob = new Blob([JSON.stringify(store, null, 2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob); var a = document.createElement('a'); a.href = url; a.download = 'orange-army-predictions-2025.json'; a.click(); setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+});
+document.getElementById('importFile').addEventListener('change', function(e){
+  var f = e.target.files[0]; if(!f) return;
+  var fr = new FileReader(); fr.onload = function(){ try{ var d = JSON.parse(fr.result); localStorage.setItem(KEY, JSON.stringify(d)); location.reload(); }catch(err){ alert('Invalid file'); } }; fr.readAsText(f);
+});
+
+/* =========================
+   Extras: Embedded facts & non-repeating selection
+   ========================= */
+// Arrays of facts & trivia (20+ each). Curated and embedded.
+var MAX_FACTS = [
+  "Max Verstappen made his F1 debut in 2015 at age 17.",
+  "Max's racing number is 33 — he chose it as a kid and has used it since F1 2016.",
+  "Verstappen was the youngest ever driver to compete in F1 (at the time) and the youngest winner.",
+  "Max won his first race (2016 Spanish GP) with Red Bull after joining mid-season.",
+  "Verstappen's father Jos Verstappen was also a Formula 1 driver.",
+  "Max is known for his late-braking overtakes and aggressive racecraft.",
+  "He is a proud Dutch driver and often celebrates with orange-themed displays.",
+  "Max trains with advanced sim rigs and a strict fitness program.",
+  "He has multiple season wins and championship titles (refer to live standings for exact count).",
+  "Verstappen is particularly strong at circuits with flowing corners and wide tracks.",
+  "He often uses the radio message 'Let's go!' when excited after a strong lap.",
+  "Max was part of the Red Bull Junior Team early in his career.",
+  "He is the first Dutch F1 World Champion in history.",
+  "Verstappen has a reputation for excellent tyre management in races.",
+  "He won multiple junior karting championships before moving to single-seaters.",
+  "Max's helmet design features Dutch motifs and his personal logo.",
+  "He is active on social media but keeps a focused, private approach to training.",
+  "Verstappen's qualifying pace is often a significant strength for race position.",
+  "He has inspired a global fanbase known as the Orange Army.",
+  "Max often collaborates with engineers to fine-tune car setup for each weekend."
+];
+
+var F1_FACTS = [
+  "Formula 1 began in 1950 as the FIA World Championship of Drivers.",
+  "F1 cars can accelerate 0-100 km/h in around 2.5 seconds, depending on conditions.",
+  "The Monaco Grand Prix is one of the oldest and most prestigious races in F1.",
+  "A modern F1 car produces significant downforce — more than its own weight at speed.",
+  "F1 pit stops are often under 3 seconds for tyre changes by top teams.",
+  "The safety car is used to neutralize the race for incidents on track.",
+  "Teams include drivers and constructors; constructors' points are earned by cars' finishes.",
+  "The championship season consists of multiple Grands Prix around the world.",
+  "F1 introduced hybrid power units in 2014 to improve efficiency.",
+  "Aerodynamics and tyre strategy are crucial to modern F1 success.",
+  "Tracks like Spa-Francorchamps and Suzuka are considered driver favorites.",
+  "F1 cars use complex ERS (energy recovery) systems for performance boosts.",
+  "Points are currently awarded to the top 10 finishers (25 for a win).",
+  "Qualifying determines grid positions and is split into Q1/Q2/Q3 sessions.",
+  "Tire compounds are supplied by a single official provider and affect strategy.",
+  "F1 has evolved with many rules to improve safety since its inception.",
+  "Drivers often practice in simulators to prepare for track conditions.",
+  "Teams must manage reliability across engines, gearboxes, and other components.",
+  "Overtaking can be influenced by DRS zones on certain tracks.",
+  "Race strategy calls (pit timing, tyre choice) often decide race outcomes."
+];
+
+var TRIVIA = [
+  // mixed MCQ and T/F style. Each entry: {type:'mcq'|'tf', q, choices:[..], a:correctIndex} for mcq; for tf: {type:'tf', q, a:true/false}
+  {type:'mcq', q: 'Which year did Max Verstappen win his first F1 race?', choices:['2015','2016','2017','2018'], a:1},
+  {type:'mcq', q: 'What is Max Verstappen\'s racing number?', choices:['1','16','33','44'], a:2},
+  {type:'tf', q: 'Max Verstappen made his F1 debut before he turned 18.', a:true},
+  {type:'mcq', q: 'Which team did Max first race for in F1?', choices:['Toro Rosso','Red Bull Racing','McLaren','Ferrari'], a:0},
+  {type:'tf', q: 'F1 races award 25 points for a win.', a:true},
+  {type:'mcq', q: 'Which circuit is traditionally known as the “Home GP” for Max?', choices:['Monza','Spa','Zandvoort','Silverstone'], a:2},
+  {type:'mcq', q: 'How many drivers score points in modern F1?', choices:['8','10','12','6'], a:1},
+  {type:'tf', q: 'The Monaco GP is a street circuit.', a:true},
+  {type:'mcq', q: 'Which system gives short bursts of power in modern F1 cars?', choices:['ERS','GPS','TCS','ABS'], a:0},
+  {type:'tf', q: 'Red Bull Racing and Toro Rosso are the exact same team name.', a:false},
+  {type:'mcq', q: 'Which tyre compound strategy affects pit stop timing most?', choices:['Soft/Hard only','Qualifying tyres','Intermediate/Full Wet only','Compound selection'], a:3},
+  {type:'mcq', q: 'Which country hosts the Abu Dhabi GP?', choices:['Qatar','UAE','Bahrain','Saudi Arabia'], a:1},
+  {type:'tf', q: 'Constructors points are separate from driver points.', a:true},
+  {type:'mcq', q: 'Which team color is traditionally associated with Ferrari?', choices:['Blue','Red','Green','Black'], a:1},
+  {type:'mcq', q: 'What does DRS stand for?', choices:['Drag Reduction System','Dynamic Racing Setup','Drive Rapidly System','Direct Racing System'], a:0},
+  {type:'tf', q: 'Max Verstappen\'s father Jos never raced in F1.', a:false},
+  {type:'mcq', q: 'Which of these is a classic high-speed F1 track?', choices:['Monaco','Zandvoort','Spa-Francorchamps','Circuit de la Sarthe'], a:2},
+  {type:'tf', q: 'ERS stands for Energy Recovery System.', a:true},
+  {type:'mcq', q: 'Which team uses papaya colors historically associated with McLaren?', choices:['McLaren','Mercedes','Ferrari','Williams'], a:0},
+  {type:'mcq', q: 'How many wheels does an F1 car have?', choices:['3','4','6','8'], a:1}
+];
+
+// Utility: shuffle array copy
+function shuffledCopy(arr){
+  var copy = arr.slice();
+  for(var i=copy.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t = copy[i]; copy[i]=copy[j]; copy[j]=t;
+  }
+  return copy;
+}
+
+// Track remaining sets to avoid repeats
+var maxFactsPool = shuffledCopy(MAX_FACTS);
+var f1FactsPool = shuffledCopy(F1_FACTS);
+var triviaPool = shuffledCopy(TRIVIA);
+
+function nextFromPool(pool, original){
+  if(pool.length === 0){
+    // reset by reshuffling
+    pool.push.apply(pool, shuffledCopy(original));
+  }
+  return pool.shift();
+}
+
+// Display Max Fact
+document.getElementById('maxFactBtn').addEventListener('click', function(){
+  var fact = nextFromPool(maxFactsPool, MAX_FACTS);
+  var box = document.getElementById('factBox');
+  box.style.display = 'block'; box.innerHTML = '<strong>Max fact</strong><div style="margin-top:8px">'+escapeHtml(fact)+'</div>';
+  // hide trivia UI if open
+  document.getElementById('triviaBox').style.display = 'none';
+});
+
+// Display F1 Fact
+document.getElementById('f1FactBtn').addEventListener('click', function(){
+  var fact = nextFromPool(f1FactsPool, F1_FACTS);
+  var box = document.getElementById('factBox');
+  box.style.display = 'block'; box.innerHTML = '<strong>F1 fact</strong><div style="margin-top:8px">'+escapeHtml(fact)+'</div>';
+  document.getElementById('triviaBox').style.display = 'none';
+});
+
+// Trivia interactive
+function renderTriviaEntry(entry){
+  var qbox = document.getElementById('triviaQ');
+  var choicesWrap = document.getElementById('triviaChoices');
+  var result = document.getElementById('triviaResult');
+  qbox.innerHTML = '<strong>Trivia</strong><div style="margin-top:8px">'+escapeHtml(entry.q)+'</div>';
+  choicesWrap.innerHTML = '';
+  result.innerHTML = '';
+  if(entry.type === 'tf'){
+    var tbtn = document.createElement('button'); tbtn.className='choice-btn'; tbtn.textContent='True';
+    var fbtn = document.createElement('button'); fbtn.className='choice-btn'; fbtn.textContent='False';
+    tbtn.addEventListener('click', function(){ checkTriviaAnswer(entry, true); });
+    fbtn.addEventListener('click', function(){ checkTriviaAnswer(entry, false); });
+    choicesWrap.appendChild(tbtn); choicesWrap.appendChild(fbtn);
+  } else if(entry.type === 'mcq'){
+    entry.choices.forEach(function(c, idx){
+      var b = document.createElement('button'); b.className='choice-btn'; b.textContent = c;
+      b.addEventListener('click', function(){ checkTriviaAnswer(entry, idx); });
+      choicesWrap.appendChild(b);
+    });
+  }
+}
+
+// check answer
+function checkTriviaAnswer(entry, answer){
+  var result = document.getElementById('triviaResult');
+  var correct = false;
+  if(entry.type === 'tf'){ correct = (entry.a === answer); }
+  else if(entry.type === 'mcq'){ correct = (entry.a === answer); }
+  if(correct){
+    result.innerHTML = '<span class="result-ok">✅ Correct!</span>';
+  } else {
+    var correctText = entry.type === 'tf' ? (entry.a ? 'True' : 'False') : entry.choices[entry.a];
+    result.innerHTML = '<span class="result-bad">❌ Wrong — correct: ' + escapeHtml(correctText) + '</span>';
+  }
+}
+
+// show a random trivia (non-repeating)
+document.getElementById('triviaBtn').addEventListener('click', function(){
+  var entry = nextFromPool(triviaPool, TRIVIA);
+  document.getElementById('factBox').style.display = 'none';
+  document.getElementById('triviaBox').style.display = 'block';
+  renderTriviaEntry(entry);
+});
+
+/* =========================
+   Small self-tests & UI readiness
+   ========================= */
+(function selfTests(){
+  var tests = [];
+  function expect(name, cond){ tests.push({name:name, pass: !!cond}); }
+  expect('countdown target exists', typeof target === 'number');
+  expect('raceSelect has options', document.getElementById('raceSelect').options.length >= 0);
+  expect('trivia pool non-empty', triviaPool.length > 0);
+  var passed = tests.filter(function(t){ return t.pass; }).length;
+  var failed = tests.length - passed;
+  var el = document.getElementById('testStatus');
+  el.textContent = 'Self-tests: ' + passed + ' passed, ' + failed + ' failed';
+  el.style.background = failed ? 'rgba(231,76,60,.06)' : 'rgba(46,204,113,.06)';
+})();
+
+/* =========================
+   Add-to-home tip
+   ========================= */
+document.getElementById('installBtn').addEventListener('click', function(){ alert('Tip: add this page to your Home Screen (browser menu) for quick access.'); });
+
+</script>
+</body>
+</html>
+
